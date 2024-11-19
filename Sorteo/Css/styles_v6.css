@@ -1,0 +1,167 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Cambio para ajustar el contenido a la parte superior */
+    min-height: 100vh;
+}
+
+.container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    max-width: 900px;  /* Aumentado el tamaño máximo para que quepan los dos textareas */
+    width: 90%;
+    text-align: center;
+    margin: 20px 0; /* Ajuste de margen superior */
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+.counter {
+    font-size: 15px;
+    color: #0f025c;
+    margin-bottom: 15px;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    color: #555;
+    margin: 15px 0 5px;
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    resize: none;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border 0.3s;
+}
+
+textarea:focus {
+    border-color: #fda085;
+    outline: none;
+}
+
+button {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    margin: 10px 5px; /* Espacio entre botones */
+}
+
+button:hover {
+    background: linear-gradient(135deg, #218838, #1e7e34);
+    transform: scale(1.05);
+}
+
+.resultado {
+    margin-top: 20px;
+    font-weight: bold;
+    color: #007bff;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #f1f9ff;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 10px;
+    height: auto; /* Cambiado de max-height a height auto para que crezca sin restricciones */
+    overflow-y: visible; /* Permite que el contenido se expanda sin necesidad de scroll */
+}
+
+li {
+    background: #e9ecef;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.3s;
+}
+
+li:hover {
+    transform: translateY(-2px);
+    background: #d3d9e3;
+}
+
+.winner-icon {
+    font-size: 24px;
+    color: #a7284e;
+}
+
+.progress-bar {
+    height: 12px;
+    background: #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 10px 0 20px;
+}
+
+.progress {
+    height: 100%;
+    background: linear-gradient(135deg, #28a745, #218838);
+    transition: width 0.3s;
+}
+
+/* Estilos para los Textarea alineados de forma paralela (izquierda y derecha) */
+.textarea-container {
+    display: flex;
+    justify-content: space-between; /* Alinea los textareas en los extremos */
+    gap: 20px; /* Espacio entre los dos textareas */
+    width: 100%;
+}
+
+.textarea-container div {
+    flex: 1; /* Cada div ocupa la misma proporción */
+    max-width: 48%; /* Aumento el máximo tamaño para que los textareas sean más largos */
+}
+
+.textarea-container textarea {
+    width: 80%; /* Asegura que cada textarea ocupe todo el espacio del div */
+    height: 200px; /* Aumento la altura de los textareas para hacerlos más largos */
+}
+
+.resultado {
+    margin-top: 20px;
+    font-weight: bold;
+    color: #007bff;
+    padding: 15px;
+    border-radius: 6px;
+    background-color: #f1f9ff;
+    font-size: 24px; /* Aumenta el tamaño del texto */
+    animation: aparecer 1s ease-out; /* Animación de aparición */
+}
+
+@keyframes aparecer {
+    0% {
+        opacity: 0;
+        transform: scale(0.5); /* Empieza más pequeño */
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1); /* Escala hasta su tamaño original */
+    }
+}

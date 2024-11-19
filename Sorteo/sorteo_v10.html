@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRUPO COMERCIAL DSWW</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="images-container">
+            <img src="./Imagen/delsol.png" alt="Imagen Izquierda" class="left-image">
+            <h1>Sorteo de Regalos 2024</h1>
+            <img src="./Imagen/Woolwhort.png" alt="Imagen Derecha" class="right-image">
+        </div>
+
+        <div class="counter">
+            <span id="ColaboradorCount">Colaborador: <strong>0</strong> </span> | 
+            <span id="regalosCount">Regalos: <strong>0</strong></span>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress" id="progressBar" style="width: 100%;"></div>
+        </div>
+        <div class="textarea-container">
+            <div>
+                <label for="Colaborador">Colaborador (uno por línea):</label>
+                <textarea id="Colaborador" rows="15" oninput="updateCount()"></textarea>
+            </div>
+            <div>
+                <label for="regalos">Regalos (uno por línea):</label>
+                <textarea id="regalos" rows="15" oninput="updateCount()"></textarea>
+            </div>
+        </div>
+        <button id="sortearButton" onclick="startAutoSort()">Sortear</button>
+        <button id="exportarButton" onclick="exportarExcel()" style="display:none;">Exportar Ganadores a Excel</button>
+
+        <div class="resultado" id="resultado"></div>
+
+        <h2>Ganadores</h2>
+        <ul id="listaGanadores"></ul>
+    </div>
+
+    <!-- Modal de Cuenta Regresiva -->
+    <div id="countdownContainer" class="countdown-container">
+        <div class="modal-content">
+            <h2>¡Sorteo Inicia!</h2>
+            <div id="countdown">3</div>
+        </div>
+    </div>
+
+    <script>
+        let ganadores = [];
+
+        function updateCount() {
+            const Colaborador = document.getElementById('Colaborador').value.split('\n').filter(Boolean);
+            const regalos = document.getElementById('regalos').value.split('\n').filter(Boolean);
+            document.getElementById('ColaboradorCount').innerText = `Colaborador: ${Colaborador.length}`;
+            document.getElementById('regalosCount').innerText = `Regalos: ${regalos.length}`;
+
+            const progressBar = document.getElementById('progressBar');
+            const progressPercentage = regalos.length ? (100 * regalos.length / (Colaborador.length + regalos.length)) : 0;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function lanzarConfeti() {
+            confetti({
+                particleCount: 100,
+                spread: 80,
+                origin: { y: 0.6 },
+                scalar: 1.0  
+            });
+        }
+
+        function startSorting(Colaborador, regalos, sortearButton, resultadoDiv, listaGanadores) {
+            sortearButton.disabled = false;
+            sortearButton.textContent = 'Sortear';
+
+            const intervalId = setInterval(() => {
+                if (Colaborador.length === 0 || regalos.length === 0) {
+                    clearInterval(intervalId);
+                    Swal.fire({
+                        title: 'Sorteo finalizado',
+                        text: '¡Felicidades a los ganadores!',
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar'
+                    });
+                    document.getElementById('exportarButton').style.display = 'inline-block';
+                    exportarExcel();
+                    return;
+                }
+
+                const empleadoAleatorio = Colaborador[Math.floor(Math.random() * Colaborador.length)];
+                const regaloAleatorio = regalos[Math.floor(Math.random() * regalos.length)];
+
+                resultadoDiv.innerHTML = `El Colaborador <strong>${empleadoAleatorio}</strong> ha ganado <strong>${regaloAleatorio}</strong>`;
+                resultadoDiv.classList.remove('animar');
+                void resultadoDiv.offsetWidth; 
+                resultadoDiv.classList.add('animar');
+
+                lanzarConfeti();
+
+                ganadores.push({ empleado: empleadoAleatorio, regalo: regaloAleatorio });
+
+                listaGanadores.innerHTML = '';
+                [...ganadores].reverse().forEach((ganador) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span class="winner-icon">🏆</span> El Colaborador <strong>${ganador.empleado}</strong> ha ganado <strong>${ganador.regalo}</strong>`;
+                    listaGanadores.appendChild(li);
+                });
+
+                Colaborador = Colaborador.filter(emp => emp !== empleadoAleatorio);
+                regalos = regalos.filter(reg => reg !== regaloAleatorio);
+
+                shuffle(Colaborador);
+                shuffle(regalos);
+
+                document.getElementById('Colaborador').value = Colaborador.join('\n');
+                document.getElementById('regalos').value = regalos.join('\n');
+
+                updateCount();
+            }, Math.floor(Math.random() * 1000) + 500);
+        }
+
+        function startAutoSort() {
+            let Colaborador = document.getElementById('Colaborador').value.split('\n').filter(Boolean);
+            let regalos = document.getElementById('regalos').value.split('\n').filter(Boolean);
+            const sortearButton = document.getElementById('sortearButton');
+            const resultadoDiv = document.getElementById('resultado');
+            const listaGanadores = document.getElementById('listaGanadores');
+            const countdownContainer = document.getElementById('countdownContainer');
+            const modalOverlay = document.createElement('div');
+            modalOverlay.classList.add('modal-overlay');
+            document.body.appendChild(modalOverlay);
+
+            if (Colaborador.length === 0 || regalos.length === 0) {
+                alert('Debe ingresar al menos un Colaborador y un regalo para realizar el sorteo.');
+                return;
+            }
+
+            shuffle(Colaborador);
+            shuffle(regalos);
+
+            sortearButton.disabled = true;
+            sortearButton.textContent = 'Sorteando...';
+
+            countdownContainer.classList.add('show');
+            modalOverlay.classList.add('show');
+            let countdownValue = 5;
+            document.getElementById('countdown').textContent = countdownValue;
+
+            const countdownInterval = setInterval(() => {
+                countdownValue--;
+                document.getElementById('countdown').textContent = countdownValue;
+                if (countdownValue <= 0) {
+                    clearInterval(countdownInterval);
+                    startSorting(Colaborador, regalos, sortearButton, resultadoDiv, listaGanadores);
+                    countdownContainer.classList.remove('show');
+                    modalOverlay.classList.remove('show');
+                    document.body.removeChild(modalOverlay);
+                }
+            }, 1000);
+        }
+
+        function exportarExcel() {
+            const wb = XLSX.utils.book_new();
+            const wsData = ganadores.map(ganador => [ganador.empleado, ganador.regalo]);
+            wsData.unshift(['Colaborador', 'Regalo']);
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, 'Ganadores');
+            XLSX.writeFile(wb, 'ganadores.xlsx');
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>

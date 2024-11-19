@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRUPO COMERCIAL DSWW</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/Css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Sorteo de Regalos</h1>
+
+        <div class="counter">
+            <span id="empleadosCount">Empleados: 0</span> | 
+            <span id="regalosCount">Regalos: 0</span>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress" id="progressBar" style="width: 100%;"></div>
+        </div>
+        <div class="textarea-container">
+        <label for="empleados">Empleados (uno por línea):</label>
+        <textarea id="empleados" rows="15" oninput="updateCount()"></textarea>
+
+        <label for="regalos">Regalos (uno por línea):</label>
+        <textarea id="regalos" rows="15" oninput="updateCount()"></textarea>
+        </div>
+        <button id="sortearButton" onclick="startAutoSort()">Sortear</button>
+        <button id="exportarButton" onclick="exportarExcel()">Exportar Ganadores a Excel</button>
+
+        <div class="resultado" id="resultado"></div>
+
+        <h2>Ganadores</h2>
+        <ul id="listaGanadores"></ul>
+    </div>
+
+    <script>
+        let ganadores = [];
+
+        function updateCount() {
+            const empleados = document.getElementById('empleados').value.split('\n').filter(Boolean);
+            const regalos = document.getElementById('regalos').value.split('\n').filter(Boolean);
+            document.getElementById('empleadosCount').innerText = `Empleados: ${empleados.length}`;
+            document.getElementById('regalosCount').innerText = `Regalos: ${regalos.length}`;
+
+            const progressBar = document.getElementById('progressBar');
+            const progressPercentage = regalos.length ? (100 * regalos.length / (empleados.length + regalos.length)) : 0;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        function startAutoSort() {
+            let empleados = document.getElementById('empleados').value.split('\n').filter(Boolean);
+            let regalos = document.getElementById('regalos').value.split('\n').filter(Boolean);
+            const sortearButton = document.getElementById('sortearButton');
+            const resultadoDiv = document.getElementById('resultado');
+            const listaGanadores = document.getElementById('listaGanadores');
+            
+            if (empleados.length === 0 || regalos.length === 0) {
+                alert('Debe ingresar al menos un empleado y un regalo para realizar el sorteo.');
+                return;
+            }
+
+            sortearButton.disabled = true;
+            sortearButton.textContent = 'Sorteando...';
+
+            const intervalId = setInterval(() => {
+                if (empleados.length === 0 || regalos.length === 0) {
+                    clearInterval(intervalId);
+                    alert('Sorteo finalizado');
+                    document.getElementById('exportarButton').style.display = 'inline-block';
+                    sortearButton.disabled = false;
+                    sortearButton.textContent = 'Sortear';
+                    return;
+                }
+
+                const empleadoAleatorio = empleados[Math.floor(Math.random() * empleados.length)];
+                const regaloAleatorio = regalos[Math.floor(Math.random() * regalos.length)];
+
+                // Mostrar el resultado en la interfaz
+                resultadoDiv.innerHTML = `El empleado <strong>${empleadoAleatorio}</strong> ha ganado <strong>${regaloAleatorio}</strong>`;
+                
+                // Guardar el ganador en la lista
+                ganadores.push({ empleado: empleadoAleatorio, regalo: regaloAleatorio });
+
+                // Mostrar la lista de ganadores
+                listaGanadores.innerHTML = '';
+                ganadores.forEach((ganador) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span class="winner-icon">🏆</span> El empleado <strong>${ganador.empleado}</strong> ha ganado <strong>${ganador.regalo}</strong>`;
+                    listaGanadores.appendChild(li);
+                });
+
+                // Eliminar el empleado y el regalo asignado
+                empleados = empleados.filter(emp => emp !== empleadoAleatorio);
+                regalos = regalos.filter(reg => reg !== regaloAleatorio);
+
+                // Actualizar los campos de texto
+                document.getElementById('empleados').value = empleados.join('\n');
+                document.getElementById('regalos').value = regalos.join('\n');
+
+                updateCount();
+            }, 1000);  // Sortear cada segundo
+        }
+
+        function exportarExcel() {
+            const wb = XLSX.utils.book_new();
+            const wsData = ganadores.map(ganador => [ganador.empleado, ganador.regalo]);
+            wsData.unshift(['Empleado', 'Regalo']); // Encabezados
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, 'Ganadores');
+
+            XLSX.writeFile(wb, 'ganadores_sorteo.xlsx');
+        }
+    </script>
+
+</body>
+</html>

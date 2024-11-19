@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRUPO COMERCIAL DSWW - Sorteo de Regalos</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .counter {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            color: #555;
+            margin: 15px 0 5px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            resize: none;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border 0.3s;
+        }
+        textarea:focus {
+            border-color: #fda085;
+            outline: none;
+        }
+        button {
+            background: linear-gradient(135deg, #28a745, #218838);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #218838, #1e7e34);
+            transform: scale(1.05);
+        }
+        .resultado {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #007bff;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #f1f9ff;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+        li {
+            background: #e9ecef;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s;
+        }
+        li:hover {
+            transform: translateY(-2px);
+            background: #d3d9e3;
+        }
+        .winner-icon {
+            font-size: 24px;
+            color: #28a745;
+        }
+        .progress-bar {
+            height: 12px;
+            background: #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 10px 0 20px;
+        }
+        .progress {
+            height: 100%;
+            background: linear-gradient(135deg, #28a745, #218838);
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Sorteo de Regalos</h1>
+
+        <div class="counter">
+            <span id="empleadosCount">Empleados: 0</span> | 
+            <span id="regalosCount">Regalos: 0</span>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress" id="progressBar" style="width: 100%;"></div>
+        </div>
+
+        <label for="empleados">Empleados (uno por línea):</label>
+        <textarea id="empleados" rows="10" oninput="updateCount()"></textarea>
+
+        <label for="regalos">Regalos (uno por línea):</label>
+        <textarea id="regalos" rows="10" oninput="updateCount()"></textarea>
+
+        <button id="sortearButton" onclick="sortear()">Sortear</button>
+
+        <div class="resultado" id="resultado"></div>
+
+        <h2>Ganadores</h2>
+        <ul id="listaGanadores"></ul>
+    </div>
+
+    <script>
+        let ganadores = [];
+
+        function updateCount() {
+            const empleados = document.getElementById('empleados').value.split('\n').filter(Boolean);
+            const regalos = document.getElementById('regalos').value.split('\n').filter(Boolean);
+            document.getElementById('empleadosCount').innerText = `Empleados: ${empleados.length}`;
+            document.getElementById('regalosCount').innerText = `Regalos: ${regalos.length}`;
+
+            const progressBar = document.getElementById('progressBar');
+            const progressPercentage = regalos.length ? (100 * regalos.length / (empleados.length + regalos.length)) : 0;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        function sortear() {
+            const empleados = document.getElementById('empleados').value.split('\n').filter(Boolean);
+            const regalos = document.getElementById('regalos').value.split('\n').filter(Boolean);
+            const resultadoDiv = document.getElementById('resultado');
+            const listaGanadores = document.getElementById('listaGanadores');
+            const sortearButton = document.getElementById('sortearButton');
+
+            if (empleados.length === 0 || regalos.length === 0) {
+                alert('Debe ingresar al menos un empleado y un regalo para realizar el sorteo.');
+                return;
+            }
+
+            sortearButton.disabled = true;
+            sortearButton.textContent = 'Sorteando...';
+
+            setTimeout(() => {
+                const empleadoAleatorio = empleados[Math.floor(Math.random() * empleados.length)];
+                const regaloAleatorio = regalos[Math.floor(Math.random() * regalos.length)];
+
+                resultadoDiv.innerHTML = `El empleado <strong>${empleadoAleatorio}</strong> ha ganado <strong>${regaloAleatorio}</strong>`;
+                ganadores.push({ empleado: empleadoAleatorio, regalo: regaloAleatorio });
+
+                listaGanadores.innerHTML = '';
+                ganadores.forEach((ganador) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span class="winner-icon">🏆</span> El empleado <strong>${ganador.empleado}</strong> ha ganado <strong>${ganador.regalo}</strong>`;
+                    listaGanadores.appendChild(li);
+                });
+
+                document.getElementById('empleados').value = empleados.filter(emp => emp !== empleadoAleatorio).join('\n');
+                document.getElementById('regalos').value = regalos.filter(reg => reg !== regaloAleatorio).join('\n');
+
+                updateCount();
+
+                if (regalos.length === 1) {
+                    alert('Sorteo finalizado');
+                }
+
+                sortearButton.disabled = false;
+                sortearButton.textContent = 'Sortear';
+            }, 500);
+        }
+    </script>
+
+</body>
+</html>
